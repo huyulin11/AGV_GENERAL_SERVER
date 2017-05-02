@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <forklift>
+    <id>1</id>
+    <forklift_number>1</forklift_number> <!-- id 唯一-->
+    <ip>10.90.35.44</ip>
+    <port>8182</port>
+    <currentTask>0</currentTask>
+    <finishStatus>2</finishStatus> <!-- 车子第一次启动 需要等待到一次报文反馈，否则不会做任务处理-->
+  </forklift>
+  
+
+  <log>
+    <level>3</level>  <!--定义三种日志输出级别0 不输出 1输出err 2输出err和warn 3输出err warn info-->
+  </log>
+</config>

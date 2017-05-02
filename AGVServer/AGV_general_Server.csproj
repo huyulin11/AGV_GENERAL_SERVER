@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{389C7208-FF20-46E3-BC83-4EE9FA9EF798}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AGV服务端</RootNamespace>
+    <AssemblyName>AGV服务端</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Win32Resource>
+    </Win32Resource>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>server.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\dao\SingleTaskDao.cs" />
+    <Compile Include="src\dao\AGVDao.cs" />
+    <Compile Include="src\dao\AGVCacheData.cs" />
+    <Compile Include="src\elevator\ElevatorFactory.cs" />
+    <Compile Include="src\elevator\ElevatorOperator.cs" />
+    <Compile Include="src\elevator\LIFT_OUT_COMMAND_T.cs" />
+    <Compile Include="src\elevator\LIFT_IN_COMMAND_T.cs" />
+    <Compile Include="src\forklift\IForkLiftWrappersService.cs" />
+    <Compile Include="src\forklift\ForkLiftWrappersService.cs" />
+    <Compile Include="src\forklift\ForkLiftWrapper.cs" />
+    <Compile Include="src\form\FormController.cs" />
+    <Compile Include="src\init\AGVConstant.cs" />
+    <Compile Include="src\init\ENV_ERR_TYPE.cs" />
+    <Compile Include="src\init\LockController.cs" />
+    <Compile Include="src\init\SHEDULE_TYPE_T.cs" />
+    <Compile Include="src\init\AGVInitialize.cs" />
+    <Compile Include="src\message\AGVMessage.cs" />
+    <Compile Include="src\message\AGVMESSAGE_TYPE_T.cs" />
+    <Compile Include="src\message\AGVMessageHandler.cs" />
+    <Compile Include="src\dao\DBDao.cs" />
+    <Compile Include="src\schedule\ScheduleFactory.cs" />
+    <Compile Include="src\schedule\ScheduleOperator.cs" />
+    <Compile Include="src\schedule\ScheduleProductionTask.cs" />
+    <Compile Include="src\schedule\ScheduleProductionInstruction.cs" />
+    <Compile Include="src\schedule\SHEDULE_PAUSE_TYPE_T.cs" />
+    <Compile Include="src\socket\AGVSocketServer.cs" />
+    <Compile Include="src\socket\AGVClientThread.cs" />
+    <Compile Include="src\form\AGVPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="src\form\AGVPanel.Designer.cs">
+      <DependentUpon>AGVPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\form\AGVConfigureForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\form\AGVConfigureForm.Designer.cs">
+      <DependentUpon>AGVConfigureForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\form\TaskButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="src\form\TaskButton.Designer.cs">
+      <DependentUpon>TaskButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\form\AGVManualCtrlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\form\AGVManualCtrlForm.Designer.cs">
+      <DependentUpon>AGVManualCtrlForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\form\PauseCtrlPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="src\form\PauseCtrlPanel.Designer.cs">
+      <DependentUpon>PauseCtrlPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="src\sys\AGVSystem.cs" />
+    <Compile Include="src\task\TaskReordService.cs" />
+    <Compile Include="src\task\ITaskReordService.cs" />
+    <Compile Include="src\task\SingleTaskService.cs" />
+    <Compile Include="src\tools\ThreadFactory.cs" />
+    <Compile Include="src\init\User.cs" />
+    <Compile Include="src\form\loginFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\form\loginFrm.Designer.cs">
+      <DependentUpon>loginFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\power\BatteryInfo.cs" />
+    <Compile Include="src\form\PagerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="src\form\PagerControl.designer.cs">
+      <DependentUpon>PagerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\schedule\ScheduleProduction.cs" />
+    <Compile Include="src\elevator\ElevatorProduction.cs" />
+    <Compile Include="src\util\AGVLog.cs" />
+    <Compile Include="src\socket\AGVSocketClient.cs" />
+    <Compile Include="src\dao\DBConnect.cs" />
+    <Compile Include="src\forklift\ForkLiftItem.cs" />
+    <Compile Include="src\form\MainFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\form\MainFrm.Designer.cs">
+      <DependentUpon>MainFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\init\AGV.cs" />
+    <Compile Include="src\AssemblyInfo.cs" />
+    <Compile Include="src\task\SingleTask.cs" />
+    <Compile Include="src\util\AGVUtil.cs" />
+    <Compile Include="src\forklift\Position.cs" />
+    <Compile Include="src\task\TaskReord.cs" />
+    <EmbeddedResource Include="src\form\AGVConfigureForm.resx">
+      <DependentUpon>AGVConfigureForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\form\loginFrm.resx">
+      <DependentUpon>loginFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\form\PagerControl.resx">
+      <DependentUpon>PagerControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\form\MainFrm.resx">
+      <DependentUpon>MainFrm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\form\AGVManualCtrlForm.resx">
+      <DependentUpon>AGVManualCtrlForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\server.ico" />
+    <Content Include="config\AGVConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jg_usbAlarmLamp.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\user.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="server.ico" />
+    <Content Include="sound\beep.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sound\lowpower.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
