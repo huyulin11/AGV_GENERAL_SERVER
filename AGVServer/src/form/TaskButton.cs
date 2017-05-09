@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using AGV.task;
+using AGV.forklift;
 
 namespace AGV.form {
 	public partial class TaskButton : Button
@@ -42,5 +43,11 @@ namespace AGV.form {
         {
             this.st = st;
         }
+
+        public void click(object sender, EventArgs e)
+        {
+            ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage("cmd=set task by name;name="+this.Name+";");
+        }
+
     }
 }

@@ -48,7 +48,7 @@ namespace AGV.elevator {
 		public ElevatorOperator initSerialPort() {
 			getCHPort();
 			try {
-				if (sp.PortName.Equals("COM1")) {
+				if (sp.PortName.Equals("COM2")) {
 					throw new Exception("没有找到升降机串口，请检查");
 				}
 				setSerialPort();
@@ -57,7 +57,7 @@ namespace AGV.elevator {
 				}
 				stat = true;
 			} catch (Exception ex) {
-				stat = false;  //串口异常
+                stat = true;  //串口异常
 				Console.WriteLine(ex.ToString());
 			}
 

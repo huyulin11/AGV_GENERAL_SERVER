@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 namespace AGV.dao {
 	public class DBConnect {
 		private static MySqlConnection connection;
-		static string server = "192.168.0.123";
+		static string server = "127.0.0.1";//"192.168.0.123";
 		private static string database = "agv";
 		private static string uid = "root";
 		private static string password = "12050901HH";

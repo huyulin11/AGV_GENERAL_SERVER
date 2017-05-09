@@ -65,7 +65,7 @@ namespace AGV.sys {
 					}
 				}
 
-				Thread.Sleep(1000);
+				Thread.Sleep(30000);
 			}
 		}
 

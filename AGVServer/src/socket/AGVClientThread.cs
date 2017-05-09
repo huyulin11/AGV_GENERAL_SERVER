@@ -124,7 +124,8 @@ namespace AGV.socket {
 					}
 
 					Console.WriteLine(i);
-					data = Encoding.ASCII.GetString(bytes, 0, i);
+                    data = Encoding.ASCII.GetString(bytes, 0, i);
+                    DBDao.getDao().InsertConnectMsg(data, "ClientService");
 					if (data.IndexOf("<AGV>") > -1) {
 						handleMessage(data);
 					}
@@ -152,7 +153,8 @@ namespace AGV.socket {
 
 					Console.WriteLine(" send data = " + sb.ToString());
 					AGVLog.WriteError(" send data = " + sb.ToString(), new StackFrame(true));
-					byte[] byteData = Encoding.ASCII.GetBytes(sb.ToString());
+                    byte[] byteData = Encoding.ASCII.GetBytes(sb.ToString());
+                    DBDao.getDao().InsertConnectMsg(sb.ToString(), "ServerService");
 					clientSocket.Send(byteData);
 					Thread.Sleep(10000);
 				}

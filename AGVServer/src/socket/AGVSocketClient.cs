@@ -7,6 +7,7 @@ using AGV.util;
 using AGV.init;
 using AGV.forklift;
 using AGV.tools;
+using AGV.dao;
 using System.Windows.Forms;
 
 namespace AGV.socket {
@@ -148,8 +149,9 @@ namespace AGV.socket {
 					msock = tcpClient.Client;
 					Array.Clear(buffer, 0, buffer.Length);
 					tcpClient.GetStream();
-					
-					int bytes = msock.Receive(buffer);
+
+                    int bytes = msock.Receive(buffer);
+                    DBDao.getDao().InsertConnectMsg(Encoding.ASCII.GetString(buffer), "receive");
 
 					readTimeOutTimes = 0; //读取超时次数清零
 					if (hrmCallback != null) {
@@ -181,8 +183,8 @@ namespace AGV.socket {
 
 			msock = tcpClient.Client;
 			try {
-				byte[] data = new byte[128];
-				data = Encoding.ASCII.GetBytes(sendMessage);
+				byte[] data = Encoding.ASCII.GetBytes(sendMessage);
+                DBDao.getDao().InsertConnectMsg(sendMessage, "SendMessage");
 				msock.Send(data);
 
 			} catch (Exception se) {
@@ -198,7 +200,8 @@ namespace AGV.socket {
 
 			Socket msock;
 			try {
-				msock = tcpClient.Client;
+                msock = tcpClient.Client;
+                DBDao.getDao().InsertConnectMsg(Encoding.ASCII.GetString(buffer), "Sendbuffer");
 				msock.Send(buffer);
 			} catch (Exception ex) {
 				AGVLog.WriteError("发送消息错误" + ex.Message, new StackFrame(true));
@@ -224,14 +227,14 @@ namespace AGV.socket {
 					tcpClient = null;
 					if (isConnectThread == false && forkLiftWrapper.getForkLift().isUsed == 1)  //connect断开后开启与车子重连
 					{
-						DialogResult dr = MessageBox.Show("是否重新连接SOCKET", "", MessageBoxButtons.YesNo);
+						/*DialogResult dr = MessageBox.Show("是否重新连接SOCKET", "", MessageBoxButtons.YesNo);
 						if (dr == DialogResult.No) {
 							Console.WriteLine(" cancelItemClick cancel ");
 							return;
 						} else {
 							startReconnectThread();
-						}
-						//startReconnectThread();
+						}*/
+						startReconnectThread();
 					}
 
 					if (forkLiftWrapper.getForkLift().isUsed == 1) {

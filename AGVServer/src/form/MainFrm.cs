@@ -65,6 +65,7 @@ namespace AGV.form {
 						button.MouseDown += taskButtonMouseDown;  //卸货1、2界面不能发送，需要到配置中单独发送
 					button.Name = st.taskName;
 					button.Text = st.taskText;
+                    button.Click += button.click;
 					Console.WriteLine(" button name = " + button.Text);
 					upButtonList.Add(button);
 					upPanel.Controls.Add(button);
