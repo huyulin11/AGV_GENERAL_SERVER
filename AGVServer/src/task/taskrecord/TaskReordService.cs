@@ -53,14 +53,14 @@ namespace AGV.task {
 		///获取状态不为执行完毕的所有任务
 		/// </summary>
 		public List<TaskRecord> getTaskRecordList() {
-			return AGVDao.getDao().getTaskRecordList();
+			return TaskrecordDao.getDao().getTaskRecordList();
 		}
 
 		/// <summary>
 		///获取状态为缓存的所有任务
 		/// </summary>
 		public List<TaskRecord> getReadySendTaskRecordList() {
-			return AGVDao.getDao().getReadySendTaskRecordList();
+			return TaskrecordDao.getDao().getReadySendTaskRecordList();
 		}
 
 
@@ -68,18 +68,18 @@ namespace AGV.task {
 		///获取制定任务类型的所有任务
 		/// </summary>
 		public List<TaskRecord> getTaskRecordList(int singleTaskID) {
-			return AGVDao.getDao().getTaskRecordList(singleTaskID);
+			return TaskrecordDao.getDao().getTaskRecordList(singleTaskID);
 		}
 
 		/// <summary>
 		///获取制定任务类型的、且状态为缓存的所有任务
 		/// </summary>
 		public List<TaskRecord> getReadySendTaskRecordList(int singleTaskID) {
-			return AGVDao.getDao().getReadySendTaskRecordList(singleTaskID);
+			return TaskrecordDao.getDao().getReadySendTaskRecordList(singleTaskID);
 		}
 
 		public void deleteAllTaskRecord() {
-			AGVDao.getDao().deleteAllTaskRecord();
+			TaskrecordDao.getDao().deleteAllTaskRecord();
 		}
 	}
 }

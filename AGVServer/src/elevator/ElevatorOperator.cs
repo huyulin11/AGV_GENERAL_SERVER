@@ -2,9 +2,9 @@
 	public interface ElevatorOperator {
 
 		/// <summary>
-		/// 初始化升降机
+		/// 系统是否需要使用升降机
 		/// </summary>
-		ElevatorOperator initSerialPort();
+		bool isNeed();
 
 		/// <summary>
 		/// 设置升降机控制命令

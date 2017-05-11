@@ -257,7 +257,9 @@ namespace AGV.message {
 					FormController.getFormController().getMainFrm().setFrmEnable(false);
 					DialogResult dr = MessageBox.Show(message.getMessageStr(), "升降机错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 					if (dr == DialogResult.OK) {
-						ElevatorFactory.getElevator().reStart(); //重新启动升降机 PLC读取线程
+						if (ElevatorFactory.getElevator().isNeed()) {
+							ElevatorFactory.getElevator().reStart(); //重新启动升降机 PLC读取线程
+						}
 						FormController.getFormController().getMainFrm().setFrmEnable(true);
 						AGVSystem.getSystem().setPause(SHEDULE_PAUSE_TYPE_T.SHEDULE_PAUSE_TYPE_MIN); //解除系统暂停
 						clearBeep();

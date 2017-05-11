@@ -2,7 +2,12 @@
 
 namespace AGV.schedule {
 	public interface ScheduleOperator {
-		
+
+		/// <summary>
+		/// 系统是否需要使用任务调度
+		/// </summary>
+		bool isNeed();
+
 		/// <summary>
 		/// 开启调度任务，检测数据库待执行的任务，将任务有效率
 		/// </summary>

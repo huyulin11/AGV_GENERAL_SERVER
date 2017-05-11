@@ -13,10 +13,16 @@ namespace AGV.schedule {
 		
 		private bool downDeliverPeriod = false;  //当前是否处于上货的状态 上货状态的时候 不发送下货任务
 
+		private bool need = false;//系统是否需要使用到任务调度
+
 		public bool getScheduleFlag() {
 			return scheduleFlag;
 		}
 
+		public bool isNeed() {
+			return need;
+		}
+		
 		public ScheduleProduction() {
 			initEnv();
 		}

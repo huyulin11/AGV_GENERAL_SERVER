@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 namespace AGV.dao {
 
-	public class AGVDao {
+	public class TaskrecordDao {
 
-		private static AGVDao dao = null;
+		private static TaskrecordDao dao = null;
 
 		private string selectFromTaskrecordStr = "select * from taskrecord where 1=1 and ";
 		private string orderByTaskrecordStr = " order by taskRecordStat desc, taskLevel desc";
 
-		private AGVDao() {
+		private TaskrecordDao() {
 		}
 
-		public static AGVDao getDao() {
+		public static TaskrecordDao getDao() {
 			if (dao == null) {
-				dao = new AGVDao();
+				dao = new TaskrecordDao();
 			}
 			return dao;
 		}

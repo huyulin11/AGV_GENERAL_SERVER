@@ -14,6 +14,7 @@ using AGV.elevator;
 using AGV.message;
 using AGV.form;
 using AGV.socket;
+using AGV.taskexe;
 
 namespace AGV.init {
 
@@ -39,6 +40,19 @@ namespace AGV.init {
 		
 		private bool useUsbAlarm = true;  //默认使用usb报警灯，如果打开usb报警灯失败，则切换到电脑声音报警
 
+		private bool agvReady = false;//对应的AGV环境是否准备妥当
+
+		public static AGVEngine getInstance() {
+			if (engine == null) {
+				engine = new AGVEngine();
+			}
+			return engine;
+		}
+
+		public bool isAgvReady() {
+			return agvReady;
+		}
+
 		public String env_err_type_text(ENV_ERR_TYPE err) {
 			string err_text = "";
 			switch (err) {
@@ -60,13 +74,6 @@ namespace AGV.init {
 			}
 
 			return err_text;
-		}
-
-		public static AGVEngine getInstance() {
-			if (engine == null) {
-				engine = new AGVEngine();
-			}
-			return engine;
 		}
 
 		public bool getUseUsbAlarm() {
@@ -196,9 +203,22 @@ namespace AGV.init {
 
 			handleCheckRunning(checkRunning());
 
-			ElevatorFactory.getElevator().startReadSerialPortThread();
-			AGVSocketServer.getSocketServer().StartAccept();
-			ScheduleFactory.getSchedule().startShedule();
+			if (ElevatorFactory.getElevator().isNeed()) {
+				ElevatorFactory.getElevator().startReadSerialPortThread();
+			}
+
+			if (AGVSocketServer.getSocketServer().isNeed()) {
+				AGVSocketServer.getSocketServer().StartAccept();
+			}
+
+			if (ScheduleFactory.getSchedule().isNeed()) {
+					ScheduleFactory.getSchedule().startShedule();
+			}
+
+			if (TaskexeService.getInstance().isNeed()) {
+				TaskexeService.getInstance().start();
+			}
+
 			AGVMessageHandler.getMessageHandler().StartHandleMessage();
 
 			FormController.getFormController().getMainFrm().ShowDialog();

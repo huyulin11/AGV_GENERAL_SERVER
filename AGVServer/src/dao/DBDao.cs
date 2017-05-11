@@ -7,24 +7,29 @@ using AGV.util;
 using AGV.task;
 using AGV.init;
 using AGV.forklift;
+using AGV.bean;
 
 namespace AGV.dao {
 	public class DBDao {
 		private static DBDao dao = null;
 		private object lockDB = new object();
 
-		private DBDao() { }
+		private DBDao() {
+		}
 
-		private MySqlDataReader execQuery(String querySql) {
+		public object getLockDB() {
+			return lockDB;
+		}
+
+		public MySqlDataReader execQuery(String querySql) {
 			return new MySqlCommand(querySql, DBConnect.getConnection()).ExecuteReader();
 		}
 
-        private MySqlDataReader execNonQuery(String querySql)
-        {
+		public MySqlDataReader execNonQuery(String querySql) {
 			return new MySqlCommand(querySql, DBConnect.getConnection()).ExecuteReader();
 		}
 
-		private object ExecuteScalar(String querySql) {
+		public object ExecuteScalar(String querySql) {
 			return new MySqlCommand(querySql, DBConnect.getConnection()).ExecuteScalar();
 		}
 		public static DBDao getDao() {
@@ -34,45 +39,35 @@ namespace AGV.dao {
 			return dao;
 		}
 
-        /// <summary>
-        /// 插入任务记录
-        /// </summary>
-        public void InsertConnectMsg(string msg,string flag)
-        {
-            string sql = "insert into connect_msg (uuid,msg,flag) values (uuid(),'" + msg + "','" + flag + "') ";
-            try
-            {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-        }
+		/// <summary>
+		/// 插入任务记录
+		/// </summary>
+		public void InsertConnectMsg(string msg, string flag) {
+			string sql = "insert into connect_msg (uuid,msg,flag) values (uuid(),'" + msg + "','" + flag + "') ";
+			try {
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
+				}
+			} catch (Exception ex) {
+				Console.WriteLine(ex.ToString());
+			}
+		}
 
-        /// <summary>
-        /// 插入任务记录
-        /// </summary>
-        public void InsertConnectListenMsg(string msg, string flag)
-        {
-            string sql = "insert into connect_listen_msg (uuid,msg,flag) values (uuid(),'" + msg + "','" + flag + "') ";
-            try
-            {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-        }
+		/// <summary>
+		/// 插入任务记录
+		/// </summary>
+		public void InsertConnectListenMsg(string msg, string flag) {
+			string sql = "insert into connect_listen_msg (uuid,msg,flag) values (uuid(),'" + msg + "','" + flag + "') ";
+			try {
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
+				}
+			} catch (Exception ex) {
+				Console.WriteLine(ex.ToString());
+			}
+		}
 
 		public List<ForkLiftWrapper> getForkLiftWrapperList() {
 			string query = "select * from forklift order by number";
@@ -147,9 +142,9 @@ namespace AGV.dao {
 
 		}
 
-		 /// <summary>
-		 /// 只查询使用的任务，主要查询缓冲任务和已完成的任务
-		 /// </summary>
+		/// <summary>
+		/// 只查询使用的任务，主要查询缓冲任务和已完成的任务
+		/// </summary>
 		public List<SingleTask> SelectSingleTaskList() {
 			string query = "select * from singleTask where taskUsed = 1 order by id";
 			List<SingleTask> list = new List<SingleTask>();
@@ -181,10 +176,9 @@ namespace AGV.dao {
 			string sql = "INSERT INTO `agv`.`taskrecord` (`taskRecordStat`, `singleTask`) VALUES ( " + (int)taskRecordStat + ", " + st.taskID + ");";
 			AGVLog.WriteInfo("InsertTaskRecord sql = " + sql, new StackFrame(true));
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
@@ -201,10 +195,9 @@ namespace AGV.dao {
 			AGVLog.WriteInfo("InsertTaskRecord sql = " + sql, new StackFrame(true));
 
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
@@ -225,10 +218,9 @@ namespace AGV.dao {
 
 
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
@@ -243,9 +235,9 @@ namespace AGV.dao {
 			AGVLog.WriteInfo("RemoveTaskRecord sql = " + sql, new StackFrame(true));
 			try {
 				lock (lockDB) {
-                    Console.WriteLine("removeTaskRecor sql = " + sql);
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+					Console.WriteLine("removeTaskRecor sql = " + sql);
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
@@ -259,10 +251,9 @@ namespace AGV.dao {
 			string sql = "delete from taskrecord where taskRecordStat = " + (int)tr.taskRecordStat + " and forklift = " + tr.forkLiftWrapper.getForkLift().id + " and singleTask = " + tr.singleTask.taskID;
 			AGVLog.WriteInfo("RemoveTaskRecord sql = " + sql, new StackFrame(true));
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
@@ -278,15 +269,16 @@ namespace AGV.dao {
 			if (tr.forkLiftWrapper == null) {
 				sql = "update taskrecord set taskRecordStat = " + (int)tr.taskRecordStat + ", forklift = NULL , taskLevel = " + tr.taskLevel + " where taskRecordStat != 4 and singleTask = " + tr.singleTask.taskID;
 			} else {
-				sql = "update taskrecord set taskRecordStat = " + (int)tr.taskRecordStat + ", forklift = " + tr.forkLiftWrapper.getForkLift().id + " , taskLevel = " + tr.taskLevel + " where taskRecordStat != 4 and singleTask = " + tr.singleTask.taskID; ;
+				sql = "update taskrecord set taskRecordStat = " + (int)tr.taskRecordStat + ", forklift = " + tr.forkLiftWrapper.getForkLift().id + " , taskLevel = " + tr.taskLevel + " where taskRecordStat != 4 and singleTask = " + tr.singleTask.taskID;
+				;
 			}
 
 			AGVLog.WriteInfo("UpdateTaskRecord sql = " + sql, new StackFrame(true));
 			try {
 				lock (lockDB) {
-                    Console.WriteLine("UpdateTaskRecord sql = " + sql);
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+					Console.WriteLine("UpdateTaskRecord sql = " + sql);
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 
 				}
 			} catch (Exception ex) {
@@ -298,24 +290,23 @@ namespace AGV.dao {
 		/// 更新车子状态
 		/// </summary>
 		public void updateForkLift(ForkLiftWrapper fl) {
-			string sql = "update forklift set currentTask = \"" + fl.getForkLift().currentTask + "\", taskStep = " + 
+			string sql = "update forklift set currentTask = \"" + fl.getForkLift().currentTask + "\", taskStep = " +
 				(int)fl.getForkLift().taskStep + " where id = " + fl.getForkLift().id;
 
 			AGVLog.WriteInfo("updateForkLift sql = " + sql, new StackFrame(true));
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());
 			}
 		}
-		
+
 		/// <summary>
-		/// 插入任务记录
+		/// 获取任务记录
 		/// </summary>
 		public List<TaskRecord> SelectTaskRecordBySql(string sql) {
 			List<TaskRecord> taskRecordList = new List<TaskRecord>();
@@ -349,14 +340,38 @@ namespace AGV.dao {
 			return taskRecordList;
 		}
 
+		/// <summary>
+		/// 获取任务指令集记录
+		/// </summary>
+		public List<TaskexeBean> SelectTaskexeBySql(string sql) {
+			List<TaskexeBean> taskexeBeanList = new List<TaskexeBean>();
+			try {
+				lock (lockDB) {
+					MySqlDataReader dataReader = execQuery(sql);
+					while (dataReader.Read()) {
+						TaskexeBean taskexeBean = new TaskexeBean();
+						taskexeBean.setUuid(dataReader["uuid"] + "");
+						taskexeBean.setTime(dataReader["time"] + "");
+						taskexeBean.setTaskid(dataReader["taskid"] + "");
+						taskexeBean.setOpflag(dataReader["opflag"] + "");
+
+						taskexeBeanList.Add(taskexeBean);
+					}
+					dataReader.Close();
+				}
+			} catch (Exception ex) {
+				Console.WriteLine(ex.ToString());
+			}
+			return taskexeBeanList;
+		}
+
 		public void DeleteWithSql(string sql) {
 			string query = sql;
 			AGVLog.WriteInfo("DeleteWithSql sql = " + sql, new StackFrame(true));
 			try {
-                lock (lockDB)
-                {
-                    MySqlDataReader dataReader = execNonQuery(sql);
-                    dataReader.Close();
+				lock (lockDB) {
+					MySqlDataReader dataReader = execNonQuery(sql);
+					dataReader.Close();
 				}
 			} catch (Exception) {
 				Console.WriteLine(" delete sql err : " + sql);

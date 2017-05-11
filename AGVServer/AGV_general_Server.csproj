@@ -74,9 +74,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\bean\CommandBean.cs" />
+    <Compile Include="src\dao\CommandQueueRecordDao.cs" />
+    <Compile Include="src\dao\CommandQueueDao.cs" />
+    <Compile Include="src\dao\CommandDao.cs" />
+    <Compile Include="src\dao\TaskexeDao.cs" />
     <Compile Include="src\dao\SingleTaskDao.cs" />
-    <Compile Include="src\dao\AGVDao.cs" />
+    <Compile Include="src\dao\TaskrecordDao.cs" />
     <Compile Include="src\dao\AGVCacheData.cs" />
+    <Compile Include="src\bean\TaskexeBean.cs" />
     <Compile Include="src\elevator\ElevatorFactory.cs" />
     <Compile Include="src\elevator\ElevatorOperator.cs" />
     <Compile Include="src\elevator\LIFT_OUT_COMMAND_T.cs" />
@@ -137,9 +143,14 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="src\sys\AGVSystem.cs" />
-    <Compile Include="src\task\TaskReordService.cs" />
-    <Compile Include="src\task\ITaskReordService.cs" />
-    <Compile Include="src\task\SingleTaskService.cs" />
+    <Compile Include="src\task\command\ICommandService.cs" />
+    <Compile Include="src\task\command\CommandService.cs" />
+    <Compile Include="src\task\taskexe\ITaskexeService.cs" />
+    <Compile Include="src\task\taskexe\TaskexeService.cs" />
+    <Compile Include="src\task\taskrecord\TaskReordService.cs" />
+    <Compile Include="src\task\taskrecord\ITaskReordService.cs" />
+    <Compile Include="src\task\taskstatic\ISingleTaskService.cs" />
+    <Compile Include="src\task\taskstatic\SingleTaskService.cs" />
     <Compile Include="src\tools\ThreadFactory.cs" />
     <Compile Include="src\init\User.cs" />
     <Compile Include="src\form\loginFrm.cs">
@@ -169,10 +180,10 @@
     </Compile>
     <Compile Include="src\init\AGV.cs" />
     <Compile Include="src\AssemblyInfo.cs" />
-    <Compile Include="src\task\SingleTask.cs" />
+    <Compile Include="src\task\taskstatic\SingleTask.cs" />
     <Compile Include="src\util\AGVUtil.cs" />
     <Compile Include="src\forklift\Position.cs" />
-    <Compile Include="src\task\TaskReord.cs" />
+    <Compile Include="src\task\taskrecord\TaskReord.cs" />
     <EmbeddedResource Include="src\form\AGVConfigureForm.resx">
       <DependentUpon>AGVConfigureForm.cs</DependentUpon>
     </EmbeddedResource>

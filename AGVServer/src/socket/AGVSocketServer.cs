@@ -7,6 +7,7 @@ using AGV.tools;
 
 namespace AGV.socket {
 	public class AGVSocketServer {
+		private bool need = false;//系统是否需要使用到AGVSocketServer
 		private static AGVSocketServer socketServer = null;
 		private Socket serverSocket = null;
 	
@@ -16,6 +17,9 @@ namespace AGV.socket {
 			serverSocket.Listen(100);
 		}
 
+		public bool isNeed() {
+			return need;
+		}
 		public static AGVSocketServer getSocketServer() {
 			if (socketServer == null) {
 				socketServer = new AGVSocketServer();

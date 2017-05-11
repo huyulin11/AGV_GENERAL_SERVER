@@ -15,6 +15,8 @@ namespace AGV.elevator {
 	/// 发送数据格式 一个字，两个字节{0x1, 0x0}, 读取能读到6个字节，前两个返回的是控制字节，后面四个是反馈字节，后面反馈字节中有一个控制指令
 	/// </summary>
 	public class ElevatorProduction : ElevatorOperator {
+		private bool need = false;//系统是否需要使用到升降机
+
 		private SerialPort sp = new SerialPort();
 		private bool isStop = false;
 		private bool stat = false;
@@ -28,6 +30,10 @@ namespace AGV.elevator {
 
 		public ElevatorProduction() {
 			initSerialPort();
+		}
+
+		public bool isNeed() {
+			return need;
 		}
 
 		private void getCHPort() {
@@ -45,22 +51,26 @@ namespace AGV.elevator {
 			sp.ReadTimeout = 1000;
 		}
 
-		public ElevatorOperator initSerialPort() {
-			getCHPort();
-			try {
-				if (sp.PortName.Equals("COM2")) {
-					throw new Exception("没有找到升降机串口，请检查");
+		/// <summary>
+		/// 初始化升降机
+		/// </summary>
+		private ElevatorOperator initSerialPort() {
+			if (isNeed()) {
+				getCHPort();
+				try {
+					if (sp.PortName.Equals("COM2")) {
+						throw new Exception("没有找到升降机串口，请检查");
+					}
+					setSerialPort();
+					if (!sp.IsOpen) {
+						sp.Open();
+					}
+					stat = true;
+				} catch (Exception ex) {
+					stat = false;  //串口异常
+					Console.WriteLine(ex.ToString());
 				}
-				setSerialPort();
-				if (!sp.IsOpen) {
-					sp.Open();
-				}
-				stat = true;
-			} catch (Exception ex) {
-                stat = true;  //串口异常
-				Console.WriteLine(ex.ToString());
 			}
-
 			return this;
 		}
 
@@ -81,14 +91,14 @@ namespace AGV.elevator {
 			COMMAND_FROME2S outCommand = COMMAND_FROME2S.LIFT_OUT_COMMAND_MIN;
 			int i = 0;
 			for (i = 0; i < response.Length; i++) {
-				if ((COMMAND_FROME2S)response[i] < COMMAND_FROME2S.LIFT_OUT_COMMAND_MAX 
+				if ((COMMAND_FROME2S)response[i] < COMMAND_FROME2S.LIFT_OUT_COMMAND_MAX
 					&& (COMMAND_FROME2S)response[i] > COMMAND_FROME2S.LIFT_OUT_COMMAND_MIN) {
 					outCommand = (COMMAND_FROME2S)response[i];
 				}
 			}
 			if (outCommand != COMMAND_FROME2S.LIFT_OUT_COMMAND_MIN) {
 			}
-			return outCommand;	
+			return outCommand;
 		}
 
 		public COMMAND_FROME2S getOutCommand() {
@@ -152,7 +162,7 @@ namespace AGV.elevator {
 
 			Console.WriteLine("send fail");
 			return;
-		end:
+			end:
 			Console.WriteLine("send success");
 		}
 
@@ -202,8 +212,11 @@ namespace AGV.elevator {
 			startReadSerialPortThread();
 		}
 
-		public bool getStat(){
-			return this.stat;
+		public bool getStat() {
+			if (!isNeed()) {
+				return true;
+			}
+			return stat;
 		}
 	}
 }

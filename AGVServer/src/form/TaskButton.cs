@@ -3,6 +3,9 @@ using System.Drawing;
 using System.Windows.Forms;
 using AGV.task;
 using AGV.forklift;
+using AGV.util;
+using System.Diagnostics;
+using AGV.init;
 
 namespace AGV.form {
 	public partial class TaskButton : Button
@@ -46,7 +49,14 @@ namespace AGV.form {
 
         public void click(object sender, EventArgs e)
         {
-            ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage("cmd=set task by name;name="+this.Name+";");
+			string cmd = "cmd=set task by name;name=" + this.Name + ";";
+			AGVLog.WriteError("向AGV下达命令: " + cmd, new StackFrame(true));
+			Console.WriteLine("向AGV下达命令: " + cmd);
+			if (AGVEngine.getInstance().isAgvReady()) {
+				ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage(cmd);
+			} else {
+				MessageBox.Show("环境中AGV尚未准备妥当");
+			}
         }
 
     }
