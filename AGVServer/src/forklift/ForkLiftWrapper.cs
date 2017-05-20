@@ -81,11 +81,12 @@ namespace AGV.forklift {
 
 			if (forkLift.gAlarm > AGVConstant.AGVALARM_TIME)  //防撞信号 检测超过12次，弹出报警提示
 			{
-				AGVLog.WriteError(forkLift.forklift_number + "触发防撞，暂停所有AGV", new StackFrame(true));
+				string msg = forkLift.forklift_number + "触发防撞，暂停所有AGV";
+				AGVLog.WriteError(msg,new StackFrame(true));
 				AGVMessage message = new AGVMessage();
 				message.setMessageType(AGVMessageHandler_TYPE_T.AGVMessageHandler_AGV_ALARM);
-				message.setMessageStr(forkLift.forklift_number + "触发防撞，暂停所有AGV");
-
+				message.setMessageStr(msg);
+				TaskexeDao.getDao().InsertTaskexePause(msg);
 				forkLift.gAlarm = 0;
 				AGVMessageHandler.getMessageHandler().setMessage(message);
 			}

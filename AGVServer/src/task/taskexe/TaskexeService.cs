@@ -4,18 +4,22 @@ using AGV.forklift;
 using AGV.init;
 using AGV.tools;
 using AGV.util;
+using AGV.task;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
+using AGV.command;
 
 namespace AGV.taskexe {
 
 	/// <summary>
 	/// 描述任务从用户下达到发送AGV执行前的逻辑
 	/// </summary>
-	public class TaskexeService : ITaskexeService {
+	public class TaskexeService:ITaskexeService {
 
 		private static TaskexeService taskexeService = null;
 		private Queue<TaskexeBean> taskexeBeanQueue = new Queue<TaskexeBean>();
@@ -55,54 +59,21 @@ namespace AGV.taskexe {
 			return taskexeBeanQueue;
 		}
 
-		public TaskexeBean removedNext() {
+		public TaskexeBean getAndRemoveNextTaskexeBean() {
 			TaskexeBean taskexeBean = getTaskexeTaskList().Dequeue();
-			TaskexeDao.getDao().deleteTaskexeBean(taskexeBean);
+			if (!"Send".Equals(taskexeBean.getOpflag())) {
+				TaskexeDao.getDao().sendTaskexeBean(taskexeBean);
+			}
 			return taskexeBean;
 		}
 
-		public void sendCommand(TaskexeBean taskexeBean) {
-			string cmd = "cmd=set task by name;name=" + taskexeBean.getTaskid() + ";";
-			AGVLog.WriteError("向AGV下达命令: " + cmd, new StackFrame(true));
-			Console.WriteLine("向AGV下达命令: " + cmd);
-			if (AGVEngine.getInstance().isAgvReady()) {
-				ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage(cmd);
-			} else {
-				CommandDao.getDao().InsertCommand(taskexeBean.getTaskid());
-			}
-		}
-
-		public bool isCommandDone() {
-			List<CommandBean> commandBeanList = CommandDao.getDao().selectLatestCommand();
-
-			if (commandBeanList == null || commandBeanList.Count <= 0) {
-				return false;
-			}
-
-			return "Over".Equals(commandBeanList[0].getOpflag());
-		}
-
-		public bool hasNext() {
+		public bool hasNextTaskexe() {
 			return !(getTaskexeTaskList() == null || getTaskexeTaskList().Count <= 0);
 		}
 
-		public void resolveTask2Command() {
-			while (true) {
-				while (hasNext()) {
-					TaskexeBean taskexeBean = removedNext();
-					sendCommand(taskexeBean);
-					Thread.Sleep(1000);
-					while (!isCommandDone()) {
-						Console.WriteLine("当前任务尚未完成" );
-						Thread.Sleep(5000);
-					}
-				}
-				Thread.Sleep(100);
-			}
-		}
-
 		public void start() {
-			ThreadFactory.newBackgroudThread(new ThreadStart(resolveTask2Command)).Start();
+			ThreadFactory.newBackgroudThread(new ThreadStart(CommandService.getInstance().resolveTaskCommand)).Start();
+			ThreadFactory.newBackgroudThread(new ThreadStart(CommandService.getInstance().resolveSYSCtrlCommand)).Start();
 		}
 	}
 }

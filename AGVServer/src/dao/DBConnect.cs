@@ -6,8 +6,8 @@ using MySql.Data.MySqlClient;
 namespace AGV.dao {
 	public class DBConnect {
 		private static MySqlConnection connection;
-		static string server = "127.0.0.1";//"192.168.0.123";
-		private static string database = "agv";
+		static string server = "127.0.0.1";//"172.18.57.221";
+		private static string database = "inoma_agv_haitian";
 		private static string uid = "root";
 		private static string password = "12050901HH";
 		private static Object lockDB = new Object();

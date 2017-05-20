@@ -43,7 +43,7 @@ namespace AGV.dao {
 		/// 插入任务记录
 		/// </summary>
 		public void InsertConnectMsg(string msg, string flag) {
-			string sql = "insert into connect_msg (uuid,msg,flag) values (uuid(),'" + msg + "','" + flag + "') ";
+			string sql = "insert into connect_msg (uuid,msg,flag) values (uuid(),REPLACE('" + msg + "','\0',''),'" + flag + "') ";
 			try {
 				lock (lockDB) {
 					MySqlDataReader dataReader = execNonQuery(sql);
@@ -159,6 +159,8 @@ namespace AGV.dao {
 						st.taskText = dataReader["taskText"] + "";
 						st.taskUsed = Convert.ToBoolean(int.Parse(dataReader["taskUsed"] + ""));
 						st.taskType = (TASKTYPE_T)int.Parse(dataReader["taskType"] + "");
+						st.setAllocid(dataReader["allocid"] + "");
+						st.setAllocOpType(dataReader["allocOpType"] + "");
 						list.Add(st);
 					}
 					dataReader.Close();
@@ -173,7 +175,7 @@ namespace AGV.dao {
 		/// 插入任务记录
 		/// </summary>
 		public void InsertTaskRecord(TASKSTAT_T taskRecordStat, SingleTask st) {
-			string sql = "INSERT INTO `agv`.`taskrecord` (`taskRecordStat`, `singleTask`) VALUES ( " + (int)taskRecordStat + ", " + st.taskID + ");";
+			string sql = "INSERT INTO `taskrecord` (`taskRecordStat`, `singleTask`) VALUES ( " + (int)taskRecordStat + ", " + st.taskID + ");";
 			AGVLog.WriteInfo("InsertTaskRecord sql = " + sql, new StackFrame(true));
 			try {
 				lock (lockDB) {
@@ -191,7 +193,7 @@ namespace AGV.dao {
 		/// 插入任务记录
 		/// </summary>
 		public void InsertTaskRecord(TaskRecord tr) {
-			string sql = "INSERT INTO `agv`.`taskrecord` (`taskRecordStat`, `singleTask`) VALUES ( " + (int)tr.taskRecordStat + ", " + tr.singleTask.taskID + ");";
+			string sql = "INSERT INTO `taskrecord` (`taskRecordStat`, `singleTask`) VALUES ( " + (int)tr.taskRecordStat + ", " + tr.singleTask.taskID + ");";
 			AGVLog.WriteInfo("InsertTaskRecord sql = " + sql, new StackFrame(true));
 
 			try {
@@ -213,7 +215,7 @@ namespace AGV.dao {
 			if (excute_min > 20 || excute_min < 3) {
 				excute_min = 6;  //过滤异常数据
 			}
-			string sql = "INSERT INTO `agv`.`taskrecord_bak` (`taskRecordStat`, `forklift`, `singleTask`, `taskRecordExcuteMinute`) VALUES ( " + (int)tr.taskRecordStat + ", " + (int)tr.forkLiftWrapper.getForkLift().id + ", " + tr.singleTask.taskID + ", " + excute_min + ");";
+			string sql = "INSERT INTO `taskrecord_bak` (`taskRecordStat`, `forklift`, `singleTask`, `taskRecordExcuteMinute`) VALUES ( " + (int)tr.taskRecordStat + ", " + (int)tr.forkLiftWrapper.getForkLift().id + ", " + tr.singleTask.taskID + ", " + excute_min + ");";
 			AGVLog.WriteInfo("InsertTaskRecordBak sql = " + sql, new StackFrame(true));
 
 

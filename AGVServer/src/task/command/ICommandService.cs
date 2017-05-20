@@ -1,4 +1,5 @@
-﻿using AGV.forklift;
+﻿using AGV.bean;
+using AGV.forklift;
 
 namespace AGV.command {
 
@@ -6,6 +7,13 @@ namespace AGV.command {
 	/// 描述任务从用户下达到发送AGV执行前的逻辑
 	/// </summary>
 	public interface ICommandService {
-		bool isSystemRunning();
+
+		void setLatestMsgFromClient(string receiveStr);
+
+		void sendCommand();
+
+		void resolveTaskCommand();
+
+		void resolveSYSCtrlCommand();
 	}
 }

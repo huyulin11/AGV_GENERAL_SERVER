@@ -29,18 +29,24 @@ namespace AGV.init {
 		/// </summary>
 		/// <param name="ulDVID">IN,保留参数，代入0</param>
 		/// <returns>1打开成功，0打开失败</returns>
-		[DllImport("jg_usbAlarmLamp.dll", CallingConvention = CallingConvention.Cdecl)]
+		[DllImport("jg_usbAlarmLamp.dll",CallingConvention = CallingConvention.Cdecl)]
 		public static extern Int32 JG_OpenUSBAlarmLamp(Int32 ulDVID);
 		#endregion
 
 		private static AGVEngine engine = null;
 		public static string AGVCONFIG_PATH = "config/AGVConfig.xml";
-		
+
 		private User currentUser = null;
-		
+
 		private bool useUsbAlarm = true;  //默认使用usb报警灯，如果打开usb报警灯失败，则切换到电脑声音报警
 
 		private bool agvReady = false;//对应的AGV环境是否准备妥当
+
+		private bool isNeedElevator = false;
+		private bool isNeedAGVSocketServer = false;
+		private bool isNeedSchedule = true;
+		private bool isNeedTaskexe = true;
+		private bool isNeedMain = false;
 
 		public static AGVEngine getInstance() {
 			if (engine == null) {
@@ -87,7 +93,7 @@ namespace AGV.init {
 		public User getCurrentUser() {
 			return currentUser;
 		}
-		
+
 		/// <summary>
 		/// 可能有缓存任务，刚启动时，车子的状态需要设置
 		/// </summary>
@@ -104,7 +110,8 @@ namespace AGV.init {
 			}
 		}
 
-		private AGVEngine() { }
+		private AGVEngine() {
+		}
 
 		/// <summary>
 		/// 开机判断有没有缓存的上货任务，如果有，设置当前阶段为上货
@@ -168,7 +175,7 @@ namespace AGV.init {
 		private void handleCheckRunning(ENV_ERR_TYPE err) {
 			if (err == ENV_ERR_TYPE.ENV_LIFT_COM_ERR) {
 				DialogResult dr;
-				dr = MessageBox.Show(env_err_type_text(err), "错误提示", MessageBoxButtons.OK);
+				dr = MessageBox.Show(env_err_type_text(err),"错误提示",MessageBoxButtons.OK);
 
 				if (dr == DialogResult.OK) {
 					Console.WriteLine(" exit ");
@@ -176,7 +183,7 @@ namespace AGV.init {
 				}
 			} else if (err == ENV_ERR_TYPE.ENV_CACHE_TASKRECORD_WARNING) {
 				DialogResult dr;
-				dr = MessageBox.Show(env_err_type_text(err), "检测到缓存任务", MessageBoxButtons.YesNo);
+				dr = MessageBox.Show(env_err_type_text(err),"检测到缓存任务",MessageBoxButtons.YesNo);
 
 				if (dr == DialogResult.Yes) {
 					Console.WriteLine(" do nothing ");
@@ -185,7 +192,7 @@ namespace AGV.init {
 				}
 			} else if (err == ENV_ERR_TYPE.ENV_CACHE_UPTASKRECORD_WARNING) {
 				DialogResult dr;
-				dr = MessageBox.Show(env_err_type_text(err), "缓存任务", MessageBoxButtons.YesNo);
+				dr = MessageBox.Show(env_err_type_text(err),"缓存任务",MessageBoxButtons.YesNo);
 
 				if (dr == DialogResult.Yes) {
 					ScheduleFactory.getSchedule().setDownDeliverPeriod(true);  //设置当前处于上货阶段
@@ -195,33 +202,38 @@ namespace AGV.init {
 			}
 		}
 		public void agvInit() {
+			if (FormController.isNeedLogin()) {
+				FormController.getFormController().getLoginFrm().ShowDialog();
+			}
 
-			FormController.getFormController().getLoginFrm().ShowDialog();
-
-			AGVLog.WriteInfo("程序启动", new StackFrame(true));
+			AGVLog.WriteInfo("程序启动",new StackFrame(true));
 			setForkliftStateFirst();
 
 			handleCheckRunning(checkRunning());
 
-			if (ElevatorFactory.getElevator().isNeed()) {
+			if (isNeedElevator) {
 				ElevatorFactory.getElevator().startReadSerialPortThread();
 			}
 
-			if (AGVSocketServer.getSocketServer().isNeed()) {
+			if (isNeedAGVSocketServer) {
 				AGVSocketServer.getSocketServer().StartAccept();
 			}
 
-			if (ScheduleFactory.getSchedule().isNeed()) {
-					ScheduleFactory.getSchedule().startShedule();
+			if (isNeedSchedule) {
+				ScheduleFactory.getSchedule().startShedule();
 			}
 
-			if (TaskexeService.getInstance().isNeed()) {
+			if (isNeedTaskexe) {
 				TaskexeService.getInstance().start();
 			}
 
 			AGVMessageHandler.getMessageHandler().StartHandleMessage();
 
-			FormController.getFormController().getMainFrm().ShowDialog();
+			if (isNeedMain) {
+				FormController.getFormController().getMainFrm().ShowDialog();
+			} else {
+				FormController.getFormController().getInfoFrm().ShowDialog();
+			}
 		}
 	}
 }

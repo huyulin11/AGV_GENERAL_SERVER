@@ -25,7 +25,7 @@ namespace AGV.dao {
 		/// <summary>
 		/// 插入任务记录
 		/// </summary>
-		public void InsertCommand(string taskid) {
+		/*public void InsertCommand(string taskid) {
 			string sql = "insert into command_queue_s2c (uuid,taskid,opflag) values (uuid(),'" + taskid + "','" + "New" + "') ";
 			try {
 				lock (DBDao.getDao().getLockDB()) {
@@ -58,7 +58,7 @@ namespace AGV.dao {
 				Console.WriteLine(" sql err " + ex.ToString());
 			}
 			return list;
-		}
+		}*/
 
 	}
 }

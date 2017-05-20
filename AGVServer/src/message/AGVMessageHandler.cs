@@ -291,11 +291,11 @@ namespace AGV.message {
 				} else if (message.getMessageType() == AGVMessageHandler_TYPE_T.AGVMessageHandler_AGV_ALARM)  //检测到防撞信号，暂停所有AGV
 				  {
 					AGVSystem.getSystem().setPause(SHEDULE_PAUSE_TYPE_T.SHEDULE_PAUSE_SYSTEM_WITH_START);
-					DialogResult dr = MessageBox.Show(message.getMessageStr(), "防撞提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-					if (dr == DialogResult.OK) {
+					//DialogResult dr = MessageBox.Show(message.getMessageStr(), "防撞提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					//if (dr == DialogResult.OK) {
 						AGVSystem.getSystem().setPause(SHEDULE_PAUSE_TYPE_T.SHEDULE_PAUSE_TYPE_MIN); //清除楼上暂停的标志，但是车子暂停不会解除
 						clearBeep();
-					}
+					//}
 				}
 				message.clear();  //清除消息
 			}

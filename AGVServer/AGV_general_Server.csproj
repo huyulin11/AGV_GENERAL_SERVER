@@ -90,6 +90,12 @@
     <Compile Include="src\forklift\IForkLiftWrappersService.cs" />
     <Compile Include="src\forklift\ForkLiftWrappersService.cs" />
     <Compile Include="src\forklift\ForkLiftWrapper.cs" />
+    <Compile Include="src\form\InfoFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\form\InfoFrm.Designer.cs">
+      <DependentUpon>InfoFrm.cs</DependentUpon>
+    </Compile>
     <Compile Include="src\form\FormController.cs" />
     <Compile Include="src\init\AGVConstant.cs" />
     <Compile Include="src\init\ENV_ERR_TYPE.cs" />
@@ -186,6 +192,9 @@
     <Compile Include="src\task\taskrecord\TaskReord.cs" />
     <EmbeddedResource Include="src\form\AGVConfigureForm.resx">
       <DependentUpon>AGVConfigureForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="src\form\InfoFrm.resx">
+      <DependentUpon>InfoFrm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="src\form\loginFrm.resx">
       <DependentUpon>loginFrm.cs</DependentUpon>

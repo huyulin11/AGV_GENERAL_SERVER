@@ -4,7 +4,12 @@
 		private MainFrm mainFrm = null;
 		private LoginFrm loginFrm = null;
 		private AGVConfigureForm fcForm = null;
-		private AGVManualCtrlForm amcForm = null;
+		private AGVManualCtrlForm amcForm = null; 
+		private InfoFrm infoFrm = null;
+
+		private static bool needLogin = false;//系统是否需要登录界面
+
+		private static bool needMain = true;//系统是否需要使用C#控制界面
 
 		public static FormController getFormController() {
 			if (formController == null) {
@@ -14,6 +19,14 @@
 		}
 
 		private FormController() {
+		}
+
+		public static bool isNeedLogin() {
+			return needLogin;
+		}
+
+		public static bool isNeedMain() {
+			return needMain;
 		}
 
 		public MainFrm getMainFrm() {
@@ -35,6 +48,13 @@
 				fcForm = new AGVConfigureForm();
 			}
 			return fcForm;
+		}
+
+		public InfoFrm getInfoFrm() {
+			if (infoFrm == null) {
+				infoFrm = new InfoFrm();
+			}
+			return infoFrm;
 		}
 
 		public AGVManualCtrlForm getAGVManualCtrlForm() {

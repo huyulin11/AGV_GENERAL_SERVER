@@ -10,7 +10,11 @@ public enum eMSG_STAT { MSG_OK, MSG_IMCOMPLETE, MSG_ERR }; //接收消息格式
 namespace AGV.schedule {
 	public class ScheduleProduction : ScheduleOperator {
 		private bool scheduleFlag = true;
-		
+
+		private bool scheduleTask = false;
+
+		private bool scheduleInstruction = true;
+
 		private bool downDeliverPeriod = false;  //当前是否处于上货的状态 上货状态的时候 不发送下货任务
 
 		private bool need = false;//系统是否需要使用到任务调度
@@ -53,12 +57,12 @@ namespace AGV.schedule {
 		/// 开启调度任务，检测数据库待执行的任务，将任务有效率
 		/// </summary>
 		public void startShedule() {
-			ThreadFactory.newBackgroudThread(
-				new ThreadStart(ScheduleProductionTask.getScheduleTask().sheduleTask)
-				).Start();
-			ThreadFactory.newBackgroudThread(
-				new ThreadStart(ScheduleProductionInstruction.getScheduleInstruction().scheduleInstruction)
-				).Start();
+			if (scheduleTask) {
+				ThreadFactory.newBackgroudThread(new ThreadStart(ScheduleProductionTask.getScheduleTask().sheduleTask)).Start();
+			}
+			if (scheduleInstruction) {
+				ThreadFactory.newBackgroudThread(new ThreadStart(ScheduleProductionInstruction.getScheduleInstruction().scheduleInstruction)).Start();
+			}
 		}
 
 		/// <summary>

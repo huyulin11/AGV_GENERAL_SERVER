@@ -9,6 +9,8 @@ using AGV.forklift;
 using AGV.tools;
 using AGV.dao;
 using System.Windows.Forms;
+using AGV.taskexe;
+using AGV.command;
 
 namespace AGV.socket {
 
@@ -20,8 +22,8 @@ namespace AGV.socket {
 		private bool isConnectThread = false;   //重连线程是否开启
 		private byte readTimeOutTimes = 0;  //读取消息超时次数
 		private bool isRecvMsgFlag = false;  //是否开启数据接收处理线程
-		public delegate void handleRecvMessageCallback(int fID, byte[] buffer, int length);  //消息处理回调函数
-		public delegate void handleReconnectCallback(ForkLiftWrapper forkLiftWrapper, bool status);  //重连回调函数
+		public delegate void handleRecvMessageCallback(int fID,byte[] buffer,int length);  //消息处理回调函数
+		public delegate void handleReconnectCallback(ForkLiftWrapper forkLiftWrapper,bool status);  //重连回调函数
 		public object clientLock = new object();
 
 		private handleRecvMessageCallback hrmCallback = null;
@@ -35,7 +37,7 @@ namespace AGV.socket {
 
 		public AGVSocketClient() {
 		}
-		
+
 		public void setForkLiftWrapper(ForkLiftWrapper forkLiftWrapper) {
 			this.forkLiftWrapper = forkLiftWrapper;
 		}
@@ -47,30 +49,30 @@ namespace AGV.socket {
 		private TcpClient getTcpClient() {
 			while (tcpClient == null) {
 				Console.WriteLine("client is null wait 1 second");
-				AGVLog.WriteWarn("client is null, wait 1 second", new StackFrame(true));
+				AGVLog.WriteWarn("client is null, wait 1 second",new StackFrame(true));
 				Thread.Sleep(1);
 			}
 
 			return tcpClient;
 		}
 
-		private void setTcpClient( ) {
+		private void setTcpClient() {
 			tcpClient.ReceiveTimeout = AGVConstant.TCPCONNECT_REVOUT;
 			tcpClient.SendTimeout = AGVConstant.TCPCONNECT_SENDOUT;
 			connectStatus = true;
 		}
 
-		public void TcpConnect(string ip, int port) {
+		public void TcpConnect(string ip,int port) {
 			try {
 				if (tcpClient == null) {
-					(tcpClient = new TcpClient()).Connect(ip, port);
+					(tcpClient = new TcpClient()).Connect(ip,port);
 					setTcpClient();
 
-					AGVLog.WriteInfo("connect ip: " + ip + " port: " + port + "succee", new StackFrame(true));
+					AGVLog.WriteInfo("connect ip: " + ip + " port: " + port + "succee",new StackFrame(true));
 					Console.WriteLine("connect ip: " + ip + " port: " + port + "succee");
 				}
 			} catch (Exception ex) {
-				AGVLog.WriteError("Connect ip: " + ip + " port: " + port + " fail" + ex.Message, new StackFrame(true));
+				AGVLog.WriteError("Connect ip: " + ip + " port: " + port + " fail" + ex.Message,new StackFrame(true));
 				Console.WriteLine("Connect ip: " + ip + " port: " + port + " fail");
 
 				Closeclient();
@@ -81,25 +83,25 @@ namespace AGV.socket {
 		/// </summary>
 		public void reConnect() {
 			Console.WriteLine("ConnectStatus:   " + connectStatus);
-			AGVLog.WriteInfo("ConnectStatus: " + connectStatus, new StackFrame(true));
+			AGVLog.WriteInfo("ConnectStatus: " + connectStatus,new StackFrame(true));
 
 			while (forkLiftWrapper.getForkLift().isUsed == 1 && !connectStatus) {
 				isConnectThread = true; //设置重连标志true
 				Thread.Sleep(5000);  //5秒钟重连一次
 
 				Console.WriteLine("start to reconnect");
-				AGVLog.WriteWarn("start to reconnect", new StackFrame(true));
+				AGVLog.WriteWarn("start to reconnect",new StackFrame(true));
 
-				TcpConnect(forkLiftWrapper.getForkLift().ip, forkLiftWrapper.getForkLift().port);
+				TcpConnect(forkLiftWrapper.getForkLift().ip,forkLiftWrapper.getForkLift().port);
 
 				if (connectStatus == true) {
-					AGVLog.WriteInfo("reconnect ip: " + forkLiftWrapper.getForkLift().ip + " :"+ forkLiftWrapper.getForkLift().port + "success", new StackFrame(true));
-					Console.WriteLine("reconnect ip: " + forkLiftWrapper.getForkLift().ip + ":" +forkLiftWrapper.getForkLift().port + "success");
-					AGVLog.WriteInfo("restart recv thread", new StackFrame(true));
+					AGVLog.WriteInfo("reconnect ip: " + forkLiftWrapper.getForkLift().ip + " :" + forkLiftWrapper.getForkLift().port + "success",new StackFrame(true));
+					Console.WriteLine("reconnect ip: " + forkLiftWrapper.getForkLift().ip + ":" + forkLiftWrapper.getForkLift().port + "success");
+					AGVLog.WriteInfo("restart recv thread",new StackFrame(true));
 
 					//hrctCallback?.Invoke(forkLiftWrapper, true);
 					if (hrctCallback != null) {
-						hrctCallback(forkLiftWrapper, true);
+						hrctCallback(forkLiftWrapper,true);
 					}
 				}
 			}
@@ -147,48 +149,51 @@ namespace AGV.socket {
 				try {
 					vClient = getTcpClient();
 					msock = tcpClient.Client;
-					Array.Clear(buffer, 0, buffer.Length);
+					Array.Clear(buffer,0,buffer.Length);
 					tcpClient.GetStream();
 
-                    int bytes = msock.Receive(buffer);
-                    DBDao.getDao().InsertConnectMsg(Encoding.ASCII.GetString(buffer), "receive");
+					int bytes = msock.Receive(buffer);
+					string receiveStr = Encoding.ASCII.GetString(buffer).Trim();
+					CommandService.getInstance().setLatestMsgFromClient(receiveStr);
+					DBDao.getDao().InsertConnectMsg(receiveStr,"receive");
 
 					readTimeOutTimes = 0; //读取超时次数清零
 					if (hrmCallback != null) {
-						hrmCallback(forkLiftWrapper.getForkLift().id, buffer, bytes);
+						hrmCallback(forkLiftWrapper.getForkLift().id,buffer,bytes);
 					}
 				} catch (SocketException ex) {
 					if (ex.ErrorCode == 10060 && readTimeOutTimes < 10) //超时次数超过10次，关闭socket进行重连
 					{
-						AGVLog.WriteWarn("read msg timeout", new StackFrame(true));
+						AGVLog.WriteWarn("read msg timeout",new StackFrame(true));
 						Console.WriteLine("read msg timeout");
 						readTimeOutTimes++;
 						continue;
 					}
-					AGVLog.WriteError("读取消息错误" + ex.ErrorCode, new StackFrame(true));
+					AGVLog.WriteError("读取消息错误" + ex.ErrorCode,new StackFrame(true));
 					Console.WriteLine("recv msg client close" + ex.ErrorCode);
+					Closeclient();
+				} catch (Exception ex) {
 					Closeclient();
 				}
 			}
 		}
 
 		public void SendMessage(string sendMessage) {
+			AGVLog.WriteSendInfo(sendMessage,new StackFrame(true));
 			Socket msock;
-			Console.WriteLine("SendMessage ConnectStatus " + connectStatus);
-			if (tcpClient == null || connectStatus == false) //检查连接状态
-			{
-				Exception ex = new Exception("connect err");
-				throw (ex);
-			}
-
-			msock = tcpClient.Client;
 			try {
+				if (tcpClient == null || connectStatus == false) {
+					Exception ex = new Exception("connect err");
+					throw (ex);
+				}
+
+				msock = tcpClient.Client;
 				byte[] data = Encoding.ASCII.GetBytes(sendMessage);
-                DBDao.getDao().InsertConnectMsg(sendMessage, "SendMessage");
+				DBDao.getDao().InsertConnectMsg(sendMessage,"SendMessage");
 				msock.Send(data);
 
 			} catch (Exception se) {
-				AGVLog.WriteError("发送消息错误" + se.Message, new StackFrame(true));
+				AGVLog.WriteError("发送消息错误" + se.Message,new StackFrame(true));
 				Console.WriteLine("send message error" + se.Message);
 				Closeclient();
 			}
@@ -200,11 +205,11 @@ namespace AGV.socket {
 
 			Socket msock;
 			try {
-                msock = tcpClient.Client;
-                DBDao.getDao().InsertConnectMsg(Encoding.ASCII.GetString(buffer), "Sendbuffer");
+				msock = tcpClient.Client;
+				DBDao.getDao().InsertConnectMsg(Encoding.ASCII.GetString(buffer),"Sendbuffer");
 				msock.Send(buffer);
 			} catch (Exception ex) {
-				AGVLog.WriteError("发送消息错误" + ex.Message, new StackFrame(true));
+				AGVLog.WriteError("发送消息错误" + ex.Message,new StackFrame(true));
 				Console.WriteLine("send message error");
 				Closeclient();
 			}
@@ -221,7 +226,7 @@ namespace AGV.socket {
 			try {
 				connectStatus = false;
 				if (tcpClient != null) {
-					AGVLog.WriteInfo("关闭socket", new StackFrame(true));
+					AGVLog.WriteInfo("关闭socket",new StackFrame(true));
 					tcpClient.Client.Close();
 					tcpClient.Close();
 					tcpClient = null;
@@ -239,17 +244,17 @@ namespace AGV.socket {
 
 					if (forkLiftWrapper.getForkLift().isUsed == 1) {
 						if (hrctCallback != null) {
-							hrctCallback(forkLiftWrapper, true);
+							hrctCallback(forkLiftWrapper,true);
 						}
 					}
 
 				}
 			} catch (Exception ex) {
-				AGVLog.WriteError("关闭socket错误" + ex.Message, new StackFrame(true));
+				AGVLog.WriteError("关闭socket错误" + ex.Message,new StackFrame(true));
 				Console.WriteLine("close socket fail");
 			}
 			Console.WriteLine("client is null now");
-			AGVLog.WriteWarn("client is null now", new StackFrame(true));
+			AGVLog.WriteWarn("client is null now",new StackFrame(true));
 		}
 	}
 }

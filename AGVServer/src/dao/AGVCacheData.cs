@@ -43,6 +43,19 @@ namespace AGV.dao {
 			return forkLift;
 		}
 
+		public static SingleTask getSingleTaskByID(int id) {
+			SingleTask singleTask = null;
+			foreach (SingleTask s in getSingleTaskList()) {
+				if (s.taskID == id)
+					singleTask = s;
+			}
+			return singleTask;
+		}
+
+		public static SingleTask getSingleTaskByID(string id) {
+			return getSingleTaskByID(int.Parse(id));
+		}
+
 		public static List<SingleTask> getSingleTaskList() {//获取供选择任务列表
 			lock (LockController.getLockController().getLockData()) {
 				if (singleTaskList == null) {

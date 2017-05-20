@@ -17,15 +17,13 @@ namespace AGV.taskexe {
 
 		Queue<TaskexeBean> getTaskexeTaskList();
 
-		TaskexeBean removedNext();
+		/// <summary>
+		/// 获取下一个bean，将该bean对应的实体状态修改为Send（如果他的初始状态为New的话），
+		/// 并从队列中剔除掉
+		/// </summary>
+		TaskexeBean getAndRemoveNextTaskexeBean();
 
-		void sendCommand(TaskexeBean taskexeBean);
-
-		bool isCommandDone();
-
-		bool hasNext();
-
-		void resolveTask2Command();
+		bool hasNextTaskexe();
 
 		void start();
 	}
