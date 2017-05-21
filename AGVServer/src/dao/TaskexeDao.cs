@@ -12,7 +12,7 @@ namespace AGV.dao {
 
 		private static string selectTaskexe = " SELECT  `uuid`,  `time`,  taskid,  opflag FROM  taskexe_s2c_task ";
 
-		private string selectTaskexeStartOrPauseSql = "SELECT  `uuid`,  `time`,  taskid,  opflag FROM  taskexe_s2c_sop where delflag=0 order by `time` desc limit 0,1 ";
+		private string selectTaskexeStartOrPauseSql = "SELECT  `uuid`,  `time`,  taskid,  opflag FROM  taskexe_s2c_sop WHERE delflag=0 AND (taskid='sysPause' OR taskid='sysContinue') ORDER BY `time` DESC LIMIT 0,1";
 
 		private string selectTaskexeTaskSql = selectTaskexe + " WHERE delflag=0 AND (opflag='New' OR opflag='Send') ORDER BY  opflag DESC,`time` LIMIT 0,10 ";
 
@@ -48,7 +48,7 @@ namespace AGV.dao {
 		}
 
 		public TaskexeBean selectTaskexeByUuid(string uuid) {
-			List<TaskexeBean> tbList = DBDao.getDao().SelectTaskexeBySql(selectTaskexeByUuidSql +"'"+ uuid+ "'");
+			List<TaskexeBean> tbList = DBDao.getDao().SelectTaskexeBySql(selectTaskexeByUuidSql + "'" + uuid + "'");
 			if (tbList == null || tbList.Count <= 0) {
 				return null;
 			} else {
@@ -61,11 +61,16 @@ namespace AGV.dao {
 			DBDao.getDao().DeleteWithSql(sql);
 		}
 
-		/// <summary>
-		/// 插入任务记录
-		/// </summary>
 		public void InsertTaskexePause(string msg) {
-			string sql = "insert into taskexe_s2c_sop (`uuid`,taskid,opflag,msg) " + "values(uuid(),'" + "sysPause"
+			InsertTaskexeSysInfo(msg, "sysPause");
+		}
+
+		public void InsertTaskexeSysInfo(string msg) {
+			InsertTaskexeSysInfo(msg, "sysInfo");
+		}
+
+		private void InsertTaskexeSysInfo(string msg, string type) {
+			string sql = "insert into taskexe_s2c_sop (`uuid`,taskid,opflag,msg) " + "values(uuid(),'" + type
 					+ "','" + "New" + "','" + msg + "')";
 			try {
 				lock (DBDao.getDao().getLockDB()) {

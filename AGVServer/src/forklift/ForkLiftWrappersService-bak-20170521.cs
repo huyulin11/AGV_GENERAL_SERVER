@@ -12,7 +12,6 @@ using AGV.form;
 using System.Collections.Generic;
 using System.Text;
 using AGV.locked;
-using AGV.command;
 
 namespace AGV.forklift {
 
@@ -43,9 +42,9 @@ namespace AGV.forklift {
 				try {
 					fl.setAGVSocketClient(new AGVSocketClient());
 					fl.getAGVSocketClient().registerRecvMessageCallback(handleForkLiftMsg);
-					fl.getAGVSocketClient().startRecvMsg();
+					fl.getAGVSocketClient().startRecvMsg(); 
 				} catch (Exception ex) {
-					AGVLog.WriteConnectInfo("连接到 ip: " + fl.getForkLift().ip + "port: " + fl.getForkLift().port + "失败！" + ex.Message, new StackFrame(true));
+					AGVLog.WriteConnectInfo("connect ip: " + fl.getForkLift().ip + "port: " + fl.getForkLift().port + "fail"+ ex.Message, new StackFrame(true));
 				}
 			}
 		}
@@ -98,20 +97,15 @@ namespace AGV.forklift {
 			int gAlarm = 1;  //AGV防撞信号 默认1 表示没有报警
 
 			string msg = parseForkLiftMsg(buffer, length);
-
 			if (string.IsNullOrEmpty(msg)) {
 				AGVLog.WriteError("msg is null", new StackFrame(true));
 				return;
 			}
 
-			if (!(msg.StartsWith("cmd=position;") && msg.EndsWith("?"))) {
-				AGVLog.WriteError("msg is error patten", new StackFrame(true));
+			if (msg.Equals(lastMsg)) {
+				//Console.WriteLine(" same msg, do not handle");
 				return;
 			}
-
-			lastMsg = msg;
-			CommandService.getInstance().setLatestMsgFromClient(msg);
-			DBDao.getDao().InsertConnectMsg(msg, "receive");
 			//Console.WriteLine("msg = " + msg);
 			//解析taskName
 			try {
@@ -195,6 +189,7 @@ namespace AGV.forklift {
 							if (x != 0 && y != 0) {
 								fl.setPosition(x, y);
 							}
+
 							if (id == 1 && pauseSetTime_f1 == 0) {
 								fl.getForkLift().shedulePause = pause_stat;  //只在启动的时候设置一次
 								pauseSetTime_f1 = 1;
@@ -218,6 +213,7 @@ namespace AGV.forklift {
 								bool stat = checkTaskSendStat(fl, taskName);
 
 								if (stat == false) {
+									Console.WriteLine("任务列表中不能匹配正确状态的任务");
 									AGVLog.WriteError("任务列表中不能匹配正确状态的任务", new StackFrame(true));
 								}
 							}
@@ -231,15 +227,29 @@ namespace AGV.forklift {
 		/// <summary>
 		/// 解析车子反馈报文
 		/// </summary>
+		/// <param name="buffer">第一个字节为0 最后一个字节为0xff，如果不满足此格式，丢弃该报文</param>
+		/// <returns>解析得到的字符串</returns>
 		private string parseForkLiftMsg(byte[] buffer, int length) {
 			if (buffer.Length == 0) {
 				AGVLog.WriteError("forklift buffer length is 0", new StackFrame(true));
 				Console.WriteLine("forklift buffer length is 0");
 				return null;
 			}
-			return Encoding.ASCII.GetString(buffer).Trim('\0').Trim();
+
+			// if (buffer[0] != 0 || buffer[length - 1] != 0xff)  //第一个byte为0 最后一个为0xff
+			//{
+			//   AGVLog.WriteError("forklift buffer is not match buffer[0] = " + Convert.ToInt16(buffer[0]) + "buffer[length - 1] = " + Convert.ToInt16(buffer[length - 1]), new StackFrame(true));
+			// return null;
+			//}
+
+			return Encoding.ASCII.GetString(buffer, 1, buffer.Length - 2);
 		}
 
+		/// <summary>
+		/// 解析车子反馈报文
+		/// </summary>
+		/// <param name="buffer">第一个字节为0 最后一个字节为0xff，如果不满足此格式，丢弃该报文</param>
+		/// <returns>解析得到的字符串</returns>
 		private bool checkForkLiftMsg(int battery_soc, int pause_stat, int finished_stat, int gAlarm) {
 			if (battery_soc < 0 || pause_stat < 0 || finished_stat < 0 || gAlarm < 0)
 				return false;
@@ -248,13 +258,18 @@ namespace AGV.forklift {
 		}
 
 		private void checkForkliftPauseStat(ForkLiftWrapper fl, int pause_stat) {
-			if (fl.getForkLift().shedulePause != pause_stat) {
+			if (fl.getForkLift().shedulePause != pause_stat)  //车的暂停状态与返回值不一样，说明没有发送成功
+			{
 				setCtrlTimes++;
 				if (setCtrlTimes > 10) {
+					//setForkCtrl(fl, fl.isPaused);  //重新发送车子暂停状态 
+					//报警，需要人工处理
 					setCtrlTimes = 0;
 					AGVMessage message = new AGVMessage();
 					message.setMessageType(AGVMessageHandler_TYPE_T.AGVMessageHandler_SENDPAUSE_ERR);
 					message.setMessageStr("检测中断错误");
+
+					//AGVInitialize.getInitialize().getAGVMessageHandler().setMessage(message);
 				}
 			}
 		}
@@ -262,44 +277,53 @@ namespace AGV.forklift {
 		/// <summary>
 		/// 检查任务状态
 		/// </summary>
+		/// <param name="fl">车子实例</param>
+		/// <param name="taskName"></param>
+		/// <returns></returns>
 		private bool checkTaskSendStat(ForkLiftWrapper fl, string taskName) {
 			bool stat = true;
-			if (fl.getForkLift().finishStatus == 1) {
+			//Console.WriteLine(" fl id " + fl.getForkLift().id + " finishStatus = " + fl.finishStatus);
+			if (fl.getForkLift().finishStatus == 1) //车子状态空闲有两种可能1：车子任务执行完成 2：任务在执行中 报文没有及时反馈
+			{
 				foreach (TaskRecord tr in TaskReordService.getInstance().getTaskRecordList()) {
-					if (tr.forkLiftWrapper != null && tr.forkLiftWrapper.getForkLift().id == fl.getForkLift().id) {
+					//if (tr.forkLift != null && tr.taskRecordName.Equals(taskName))
+					if (tr.forkLiftWrapper != null && tr.forkLiftWrapper.getForkLift().id == fl.getForkLift().id)  //可能存在任务没发送成功，反馈的taskName与现在taskrecord的名称不一样
+					{
 						if (tr.taskRecordStat == TASKSTAT_T.TASK_SEND) {
-							if (fl.getForkLift().waitTimes > 15) {
+							if (fl.getForkLift().waitTimes > 15) //等待次数超过15次，后面重新发送该任务
+							{
 								Console.WriteLine("send task: " + taskName + "to " + fl.getForkLift().forklift_number + "fail");
 								fl.getForkLift().waitTimes = 0;
 								tr.forkLiftWrapper = null;
-								fl.getForkLift().taskStep = TASK_STEP.TASK_IDLE;
+								fl.getForkLift().taskStep = TASK_STEP.TASK_IDLE;  //车子状态改为空闲
 								fl.getForkLift().currentTask = "";
-								DBDao.getDao().updateForkLift(fl);
+								DBDao.getDao().updateForkLift(fl);  //赋值空字符串
 								if (tr.singleTask.taskType == TASKTYPE_T.TASK_TYPE_UP_PICK) {
 
 									DBDao.getDao().RemoveTaskRecord(tr);
 									AGVLog.WriteWarn("forklift number: " + fl.getForkLift().forklift_number + " taskName: " + taskName + " 发送失败 移除任务", new StackFrame(true));
 								} else {
-									tr.taskRecordStat = TASKSTAT_T.TASK_READY_SEND;
+									tr.taskRecordStat = TASKSTAT_T.TASK_READY_SEND; //改变任务的状态，后面重新发送
 									tr.singleTask.taskStat = TASKSTAT_T.TASK_READY_SEND;
 									DBDao.getDao().UpdateTaskRecord(tr);
 									AGVLog.WriteWarn("forklift number: " + fl.getForkLift().forklift_number + " taskName: " + taskName + " 发送失败 更新任务状态，等待重新发送", new StackFrame(true));
 								}
-								FormController.getFormController().getMainFrm().updateFrm();
+								FormController.getFormController().getMainFrm().updateFrm(); //设置更新界面
 							} else {
 								fl.getForkLift().waitTimes++;
 								Console.WriteLine("fl: " + fl.getForkLift().forklift_number + "taskName: " + taskName + "waittimes: " + fl.getForkLift().waitTimes);
 								AGVLog.WriteWarn("forklift number: " + fl.getForkLift().forklift_number + " taskName: " + taskName + " waittimes: " + fl.getForkLift().waitTimes, new StackFrame(true));
 							}
 							break;
-						} else if (tr.taskRecordStat == TASKSTAT_T.TASK_SEND_SUCCESS) {
+						} else if (tr.taskRecordStat == TASKSTAT_T.TASK_SEND_SUCCESS) //确保没有重复进入，否则会插入多条备份记录
+						  {
 							Console.WriteLine("task: " + taskName + "in " + fl.getForkLift().forklift_number + "finished");
 							AGVLog.WriteInfo("taskName: " + taskName + "in " + fl.getForkLift().forklift_number + " finished", new StackFrame(true));
-							DBDao.getDao().RemoveTaskRecord(tr);
+							DBDao.getDao().RemoveTaskRecord(tr);  //移除record是3的记录
 							DBDao.getDao().InsertTaskRecordBak(tr);
 							tr.singleTask.taskStat = TASKSTAT_T.TASK_END;
 							tr.taskRecordStat = TASKSTAT_T.TASK_END;
-							FormController.getFormController().getMainFrm().updateFrm();
+							FormController.getFormController().getMainFrm().updateFrm(); //设置更新界面 //设置更新界面
 							fl.getForkLift().taskStep = TASK_STEP.TASK_IDLE;
 							fl.getForkLift().currentTask = "";
 							DBDao.getDao().updateForkLift(fl);
@@ -332,6 +356,21 @@ namespace AGV.forklift {
 						break; //每次只匹配一条记录，可能存在两条记录，对应singleTask一样，一条正在运行，一条待发送，适应一键添加功能
 					}
 				}
+				/*
+								if (storeTask)  //系统启动后，车子可能正在执行任务起来，将正在执行的任务缓存
+								{
+									TaskRecord tr = new TaskRecord();
+									tr.taskRecordName = taskName;
+									tr.forkLift = fl;
+									tr.taskRecordStat = TASKSTAT_T.TASK_SEND_SUCCESS; //状态已经发送成功
+									tr.setSingleTaskByTaskName(AGVUtil.parseTaskRecordName(taskName));
+									fl.getForkLift().taskStep = TASK_STEP.TASK_EXCUTE;
+									addTs = tr;
+									//AGVInitialize.getInitialize().getMainFrm().updateCurrentTask(st.taskName); //更新界面上的当前任务
+									Console.WriteLine("store task: " + tr.taskRecordName + "taskNumber:" + taskRecordList.Count);
+									AGVLog.WriteInfo("store task: " + tr.taskRecordName + "at boot task count: " + taskRecordList.Count, new StackFrame(true));
+								}
+				*/
 			} else {
 				Console.WriteLine("fork status err");
 				AGVLog.WriteError("fork lift staus: " + fl.getForkLift().finishStatus + "err", new StackFrame(true));

@@ -19,7 +19,8 @@ namespace AGV.taskexe {
 	/// <summary>
 	/// 描述任务从用户下达到发送AGV执行前的逻辑
 	/// </summary>
-	public class TaskexeService:ITaskexeService {
+	public class TaskexeService : ITaskexeService {
+		private Thread thread1 = null;
 
 		private static TaskexeService taskexeService = null;
 		private Queue<TaskexeBean> taskexeBeanQueue = new Queue<TaskexeBean>();
@@ -59,6 +60,19 @@ namespace AGV.taskexe {
 			return taskexeBeanQueue;
 		}
 
+		public TaskexeBean getNextTaskexeBean() {
+			List<TaskexeBean> taskexeBeanList = TaskexeDao.getDao().getTaskexeTaskList();
+			if (taskexeBeanList == null || taskexeBeanList.Count <= 0) {
+				return null;
+			}
+			TaskexeBean taskexeBean = taskexeBeanList[0];
+			AGVLog.WriteSendInfo("下一个执行的任务ID：" + taskexeBean.getTaskid(), new StackFrame(true));
+			if (!"Send".Equals(taskexeBean.getOpflag())) {
+				TaskexeDao.getDao().sendTaskexeBean(taskexeBean);
+			}
+			return taskexeBean;
+		}
+
 		public TaskexeBean getAndRemoveNextTaskexeBean() {
 			TaskexeBean taskexeBean = getTaskexeTaskList().Dequeue();
 			if (!"Send".Equals(taskexeBean.getOpflag())) {
@@ -72,8 +86,26 @@ namespace AGV.taskexe {
 		}
 
 		public void start() {
-			ThreadFactory.newBackgroudThread(new ThreadStart(CommandService.getInstance().resolveTaskCommand)).Start();
-			ThreadFactory.newBackgroudThread(new ThreadStart(CommandService.getInstance().resolveSYSCtrlCommand)).Start();
+			Thread.CurrentThread.Name = "主要线程";
+			thread1 = ThreadFactory.newThread(new ThreadStart(CommandService.getInstance().resolveTaskCommand));
+			thread1.Name = "任务解析线程";
+			thread1.Start();
+			Thread thread2 = ThreadFactory.newThread(new ThreadStart(CommandService.getInstance().resolveSYSCtrlCommand));
+			thread2.Start();
+			Thread thread3 = ThreadFactory.newThread(new ThreadStart(listenThread1));
+			thread3.Start();
+		}
+
+		public void listenThread1() {
+			while (true) {
+				if (thread1 == null) {
+					return;
+				} else {
+					AGVLog.WriteThreadInfo(thread1.Name + "的执行状态为：" + thread1.ThreadState + ",其托管线程id为"
+						+ thread1.ManagedThreadId, new StackFrame(true));
+				}
+				Thread.Sleep(2000);
+			}
 		}
 	}
 }

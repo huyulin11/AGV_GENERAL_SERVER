@@ -1,4 +1,6 @@
-﻿namespace AGV.form {
+﻿using System.Windows.Forms;
+
+namespace AGV.form {
 	partial class InfoFrm {
 		/// <summary>
 		/// Required designer variable.
@@ -35,6 +37,7 @@
 			this.label1.TabIndex = 0;
 			this.label1.Text = "启动成功并开始后台调度，请勿关闭此页面！";
 			this.label1.Click += new System.EventHandler(this.label1_Click);
+			this.FormClosing += new FormClosingEventHandler(mainForm_Closing);
 			// 
 			// InfoFrm
 			// 

@@ -23,6 +23,8 @@ namespace AGV.taskexe {
 		/// </summary>
 		TaskexeBean getAndRemoveNextTaskexeBean();
 
+		TaskexeBean getNextTaskexeBean();
+
 		bool hasNextTaskexe();
 
 		void start();

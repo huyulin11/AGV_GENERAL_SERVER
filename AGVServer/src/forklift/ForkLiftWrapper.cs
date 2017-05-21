@@ -86,7 +86,8 @@ namespace AGV.forklift {
 				AGVMessage message = new AGVMessage();
 				message.setMessageType(AGVMessageHandler_TYPE_T.AGVMessageHandler_AGV_ALARM);
 				message.setMessageStr(msg);
-				TaskexeDao.getDao().InsertTaskexePause(msg);
+				TaskexeDao.getDao().InsertTaskexePause("");
+				TaskexeDao.getDao().InsertTaskexeSysInfo(msg);
 				forkLift.gAlarm = 0;
 				AGVMessageHandler.getMessageHandler().setMessage(message);
 			}

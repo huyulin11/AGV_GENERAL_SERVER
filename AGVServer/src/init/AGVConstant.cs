@@ -4,8 +4,8 @@
 		public const int readPLCInterval = 2000;   //2秒钟读一次 时间太长会导致连续拍两次按钮检测不到
 		public const int handleTaskInterval = 1000; //任务处理时间间隔
 
-		public const int TCPCONNECT_REVOUT = 15000;
-		public const int TCPCONNECT_SENDOUT = 10000;
+		public const int TCPCONNECT_REVOUT = 1500;
+		public const int TCPCONNECT_SENDOUT = 1000;
 		public const int AGVALARM_TIME = 30;  //检测到防撞信号超过12次，报警
 
 		public const int BORDER_X_DEVIARION = 100;

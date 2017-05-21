@@ -41,7 +41,7 @@ namespace AGV.command {
 					Thread.Sleep(1000);
 				}
 			} catch (Exception) {
-				AGVLog.WriteInfo("循环器异常退出！",new StackFrame(true));
+				AGVLog.WriteSendInfo("循环器异常退出！",new StackFrame(true));
 			}
 		}
 
@@ -56,38 +56,44 @@ namespace AGV.command {
 					Thread.Sleep(1000);
 				}
 			} catch (Exception) {
-				AGVLog.WriteInfo("循环器异常退出！",new StackFrame(true));
+				AGVLog.WriteSendInfo("循环器异常退出！",new StackFrame(true));
 			}
 		}
 
 		public void sendCommand() {
-			while (TaskexeService.getInstance().hasNextTaskexe()) {
-				TaskexeBean taskexeBean = TaskexeService.getInstance().getAndRemoveNextTaskexeBean();
-				string cmd = "cmd=set task by name;name=" + taskexeBean.getTaskid() + ".xml";
-				SingleTask singleTask = AGVCacheData.getSingleTaskByID(taskexeBean.getTaskid());
-
-				sendContinueCommand();
-
-				Thread.Sleep(1000);
-
-				int i = -2;
-				while (string.IsNullOrEmpty(latestMsgFromClient) || latestMsgFromClient.IndexOf("task_isfinished=") < 0 || !"0".Equals(latestMsgFromClient.Substring(latestMsgFromClient.IndexOf("task_isfinished=") + "task_isfinished=".Length,1))) {
-					if ("1".Equals(singleTask.getAllocOpType())) {
-						send(cmd);
-						Thread.Sleep(3000);
-						if (!AGVEngine.getInstance().isAgvReady()) {
-							latestMsgFromClient = "task_isfinished=" + (i++) + ";";
-						}
-					}
-				}
-				while (true) {
-					if ("Over".Equals(TaskexeDao.getDao().selectTaskexeByUuid(taskexeBean.getUuid()).getOpflag())) {
-						break;
-					}
-					Thread.Sleep(1000);
-				}
-				Thread.Sleep(1000);
+			AGVLog.WriteSendInfo("开始处理！", new StackFrame(true));
+			TaskexeBean taskexeBean = TaskexeService.getInstance().getNextTaskexeBean();
+			if (taskexeBean == null) {
+				return;
 			}
+			string cmd = "cmd=set task by name;name=" + taskexeBean.getTaskid() + ".xml";
+			SingleTask singleTask = AGVCacheData.getSingleTaskByID(taskexeBean.getTaskid());
+
+			sendContinueCommand();
+
+			Thread.Sleep(1000);
+
+			int i = -2;
+
+			if ("1".Equals(singleTask.getAllocOpType())) {
+				while (string.IsNullOrEmpty(latestMsgFromClient) || latestMsgFromClient.IndexOf("task_isfinished=") < 0 || !"0".Equals(latestMsgFromClient.Substring(latestMsgFromClient.IndexOf("task_isfinished=") + "task_isfinished=".Length, 1))) {
+					send(cmd);
+					AGVLog.WriteSendInfo("发送命令:"+ cmd, new StackFrame(true));
+					Thread.Sleep(3000);
+					if (!AGVEngine.getInstance().isAgvReady()) {
+						latestMsgFromClient = "task_isfinished=" + (i++) + ";";
+					}
+				}
+			}
+
+			while (true) {
+				AGVLog.WriteSendInfo("判断任务"+ taskexeBean.getTaskid() + "是否Over！", new StackFrame(true));
+				if ("Over".Equals(TaskexeDao.getDao().selectTaskexeByUuid(taskexeBean.getUuid()).getOpflag())) {
+					break;
+				}
+				Thread.Sleep(5000);
+			}
+			Thread.Sleep(1000);
 		}
 
 		public void sendPauseCommand() {
@@ -101,9 +107,13 @@ namespace AGV.command {
 		}
 
 		private void send(string cmd) {
-			AGVLog.WriteInfo("向AGV下达命令: " + cmd,new StackFrame(true));
 			if (AGVEngine.getInstance().isAgvReady()) {
-				ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage(cmd);
+				while (true) {
+					if (ForkLiftWrappersService.getInstance().getForkLiftByNunber(1).getAGVSocketClient().SendMessage(cmd)) {
+						break;
+					}
+					Thread.Sleep(5000);
+				}
 			} else {
 				AGVLog.WriteSendInfo("向AGV下达命令: " + cmd,new StackFrame(true));
 			}

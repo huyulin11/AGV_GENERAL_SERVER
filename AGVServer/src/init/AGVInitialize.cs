@@ -40,7 +40,7 @@ namespace AGV.init {
 
 		private bool useUsbAlarm = true;  //默认使用usb报警灯，如果打开usb报警灯失败，则切换到电脑声音报警
 
-		private bool agvReady = false;//对应的AGV环境是否准备妥当
+		private bool agvReady = true;//对应的AGV环境是否准备妥当
 
 		private bool isNeedElevator = false;
 		private bool isNeedAGVSocketServer = false;
