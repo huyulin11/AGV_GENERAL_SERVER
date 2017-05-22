@@ -74,8 +74,7 @@ namespace AGV.dao {
 					+ "','" + "New" + "','" + msg + "')";
 			try {
 				lock (DBDao.getDao().getLockDB()) {
-					MySqlDataReader dataReader = DBDao.getDao().execNonQuery(sql);
-					dataReader.Close();
+					DBDao.getDao().execNonQuery(sql);
 				}
 			} catch (Exception ex) {
 				Console.WriteLine(ex.ToString());

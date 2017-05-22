@@ -162,11 +162,11 @@ namespace AGV.init {
 			///检测USB报警灯，如果USB报警灯有问题，切换到电脑声音报警
 			try {
 				if (JG_OpenUSBAlarmLamp(0) == 0) {
-					MessageBox.Show("打开报警灯失败，切换到电脑声音报警");
+					//MessageBox.Show("打开报警灯失败，切换到电脑声音报警");
 					useUsbAlarm = false;
 				}
 			} catch (Exception ex) {
-				MessageBox.Show("打开报警灯失败，切换到电脑声音报警");
+				//MessageBox.Show("打开报警灯失败，切换到电脑声音报警");
 				useUsbAlarm = false;
 			}
 			return err;
