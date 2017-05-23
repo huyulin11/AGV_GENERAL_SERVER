@@ -153,7 +153,6 @@ namespace AGV.util {
 			} catch (Exception ex) {
 				MessageBox.Show(filepath + "文件被占用，无法更新日志，请检查后重启AGV服务程序！");
 				TaskexeDao.getDao().InsertTaskexeSysInfo(filepath + "文件被占用，无法更新日志，请检查后重启AGV服务程序！");
-				System.Environment.Exit(0);
 			}
 		}
 

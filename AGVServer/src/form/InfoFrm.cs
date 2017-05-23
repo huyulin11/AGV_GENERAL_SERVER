@@ -1,4 +1,5 @@
 ﻿using AGV.dao;
+using AGV.sys;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,8 +21,7 @@ namespace AGV.form {
 
 			if (dr == System.Windows.Forms.DialogResult.OK) {
 				this.Dispose();
-				TaskexeDao.getDao().InsertTaskexeSysInfo("用户手动关闭AGV服务程序！");
-				System.Environment.Exit(0);
+				AGVSystem.getSystem().exitAGVServer();
 			} else if (dr == System.Windows.Forms.DialogResult.Cancel) {
 				e.Cancel = true;
 			}

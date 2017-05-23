@@ -22,6 +22,11 @@ namespace AGV.sys {
 
 		private AGVSystem() { }
 
+		public void exitAGVServer() {
+			TaskexeDao.getDao().InsertTaskexeSysInfo("AGV通讯服务程序已关闭，开启前无法与AGV通讯！");
+			System.Environment.Exit(0);
+		}
+
 		public void setLowpowerShedule(bool flag) {
 			this.lowpowerShedule = flag;
 		}

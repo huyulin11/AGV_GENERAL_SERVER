@@ -206,7 +206,7 @@ namespace AGV.init {
 				FormController.getFormController().getLoginFrm().ShowDialog();
 			}
 
-			AGVLog.WriteInfo("程序启动",new StackFrame(true));
+			TaskexeDao.getDao().InsertTaskexeSysInfo("AGV通讯服务程序启动！");
 			setForkliftStateFirst();
 
 			handleCheckRunning(checkRunning());
